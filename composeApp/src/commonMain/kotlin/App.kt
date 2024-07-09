@@ -27,15 +27,11 @@ import splash.SplashScreen
 fun App() {
     MaterialTheme {
         Surface(color = MaterialTheme.colors.background) {
-
             val scope = rememberCoroutineScope()
             val navigationState by remember { mutableStateOf(NavigationState()) }
-
-
             LaunchedEffect(Unit) {
                 scope.launch(Dispatchers.IO) { navigationState.initialize() }
             }
-
             Screen(navigationState)
         }
     }

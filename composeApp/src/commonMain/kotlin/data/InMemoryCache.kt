@@ -1,4 +1,4 @@
-package dataSources
+package data
 
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty

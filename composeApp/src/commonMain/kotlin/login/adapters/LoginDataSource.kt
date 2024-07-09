@@ -1,7 +1,7 @@
 package login.adapters
 
-import dataSources.DataSources
-import dataSources.DataSourcesImpl
+import data.DataSources
+import data.DataSourcesImpl
 import login.core.ports.LoginDataSourcePort
 
 class LoginDataSource(

@@ -1,6 +1,9 @@
-package dataSources
+package data
 
+import data.mocks.GithubRepositoriesMockResponse
+import data.models.AllGithubRepositoriesData
 import kotlinx.coroutines.delay
+import kotlinx.serialization.json.Json
 
 /**
  * add expect when integrating with real data sources, if we had to
@@ -42,5 +45,9 @@ object DataSourcesImpl : DataSources {
      */
     override suspend fun isLoggedIn(): Boolean {
         return token != null
+    }
+
+    override suspend fun getAllGithubRepositories(): AllGithubRepositoriesData {
+        return Json.decodeFromString(GithubRepositoriesMockResponse)
     }
 }

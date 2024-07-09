@@ -1,7 +1,7 @@
 package navigation.adapters
 
-import dataSources.DataSources
-import dataSources.DataSourcesImpl
+import data.DataSources
+import data.DataSourcesImpl
 import navigation.core.ports.NavigationDataSourcePort
 
 class NavigationDataSources(
