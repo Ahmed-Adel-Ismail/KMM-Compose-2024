@@ -67,58 +67,66 @@ fun LoginScreenContent(
     modifier: Modifier = Modifier
 ) {
     if (result == LoginStatePort.Result.Success) {
-        onSuccess(); return
+        onSuccess()
     } else {
         Column(modifier = modifier.fillMaxSize()) {
-
             TopAppBar(title = { Text(text = "Login", modifier = Modifier.fillMaxWidth()) })
-
             if (progress) LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-
             Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
+                modifier = Modifier.fillMaxSize().padding(16.dp),
                 verticalArrangement = androidx.compose.foundation.layout.Arrangement.Center,
             ) {
-
-                OutlinedTextField(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 16.dp),
-                    value = userName.orEmpty(),
-                    singleLine = true,
-                    label = { Text(text = "Username") },
-                    isError = result is LoginStatePort.Result.Error && result.error is InvalidUsernameException,
-                    onValueChange = onUsernameChanged
-                )
-
-                OutlinedTextField(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 16.dp),
-                    value = password.orEmpty(),
-                    label = { Text(text = "Password") },
-                    singleLine = true,
-                    visualTransformation = PasswordVisualTransformation(),
-                    isError = result is LoginStatePort.Result.Error && result.error is InvalidPasswordException,
-                    onValueChange = onPasswordChanged
-                )
-
-                Button(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(backgroundColor = if (!progress) MaterialTheme.colors.primary else Color.Gray),
-                    onClick = { if (!progress) onLoginClicked() }) {
-                    Text(text = "Login")
-                }
-
-
+                UsernameOutlinedTextField(userName, result, onUsernameChanged)
+                PasswordOutlinedTextField(password, result, onPasswordChanged)
+                LoginButton(progress, onLoginClicked)
             }
         }
     }
 }
 
 @Composable
-private fun LoginTopAppBar(onCloseClicked: () -> Unit) {
+fun UsernameOutlinedTextField(
+    userName: String?,
+    result: LoginStatePort.Result?,
+    onUsernameChanged: (String?) -> Unit
+) {
+    OutlinedTextField(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 16.dp),
+        value = userName.orEmpty(),
+        singleLine = true,
+        label = { Text(text = "Username") },
+        isError = result is LoginStatePort.Result.Error && result.error is InvalidUsernameException,
+        onValueChange = onUsernameChanged
+    )
+}
 
+@Composable
+fun PasswordOutlinedTextField(
+    password: String?,
+    result: LoginStatePort.Result?,
+    onPasswordChanged: (String?) -> Unit
+) {
+    OutlinedTextField(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 16.dp),
+        value = password.orEmpty(),
+        label = { Text(text = "Password") },
+        singleLine = true,
+        visualTransformation = PasswordVisualTransformation(),
+        isError = result is LoginStatePort.Result.Error && result.error is InvalidPasswordException,
+        onValueChange = onPasswordChanged
+    )
+}
+
+@Composable
+fun LoginButton(progress: Boolean, onLoginClicked: () -> Unit) {
+    Button(
+        modifier = Modifier.fillMaxWidth(),
+        colors = ButtonDefaults.buttonColors(backgroundColor = if (!progress) MaterialTheme.colors.primary else Color.Gray),
+        onClick = { if (!progress) onLoginClicked() }) {
+        Text(text = "Login")
+    }
 }

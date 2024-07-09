@@ -30,36 +30,45 @@ fun App() {
 
             val scope = rememberCoroutineScope()
             val navigationState by remember { mutableStateOf(NavigationState()) }
-            val screen by navigationState.screen
-            var state by navigationState.state
+
 
             LaunchedEffect(Unit) {
                 scope.launch(Dispatchers.IO) { navigationState.initialize() }
             }
 
-            when (screen) {
+            Screen(navigationState)
+        }
+    }
+}
 
-                Splash -> {
-                    state = null
-                    SplashScreen()
-                }
+@Composable
+fun Screen(
+    navigationState: NavigationState
+) {
+    val screen by navigationState.screen
+    var state by navigationState.state
 
-                Login -> {
-                    val newState: LoginStatePort =
-                        if (state is LoginStatePort) state as LoginStatePort
-                        else LoginState().also { state = it }
+    when (screen) {
 
-                    LoginScreen(
-                        loginStatePort = newState,
-                        onSuccess = { navigationState.screen.value = Home },
-                    )
-                }
+        Splash -> {
+            state = null
+            SplashScreen()
+        }
 
-                Home -> {
-                    state = null
-                    HomeScreen()
-                }
-            }
+        Login -> {
+            val newState: LoginStatePort =
+                if (state is LoginStatePort) state as LoginStatePort
+                else LoginState().also { state = it }
+
+            LoginScreen(
+                loginStatePort = newState,
+                onSuccess = { navigationState.screen.value = Home },
+            )
+        }
+
+        Home -> {
+            state = null
+            HomeScreen()
         }
     }
 }
