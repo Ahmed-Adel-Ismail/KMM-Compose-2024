@@ -30,6 +30,7 @@ import org.jetbrains.compose.resources.painterResource
 
 @Composable
 fun HomeScreen() {
+    // TODO : working on home feature still
     GithubRepositoriesList(items = (1..100).map { githubRepository(it) })
 }
 
