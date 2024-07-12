@@ -1,9 +1,10 @@
 package data
 
-import data.mocks.GithubRepositoriesMockResponse
+import GithubRepositoryData
+import OwnerData
 import data.models.AllGithubRepositoriesData
 import kotlinx.coroutines.delay
-import kotlinx.serialization.json.Json
+import kotlin.random.Random
 
 /**
  * add expect when integrating with real data sources, if we had to
@@ -47,7 +48,29 @@ object DataSourcesImpl : DataSources {
         return token != null
     }
 
+    // TODO: to be fetched from actual datasource with ktor
     override suspend fun getAllGithubRepositories(): AllGithubRepositoriesData {
-        return Json.decodeFromString(GithubRepositoriesMockResponse)
+        // return Json.decodeFromString(GithubRepositoriesMockResponse)
+        return AllGithubRepositoriesData(
+            data = (1..500).map { mockGithubRepository(it) }
+        )
+
     }
+
+    private fun mockGithubRepository(id: Int = 1) = GithubRepositoryData(
+        id = id.toLong(),
+        name = "Github Repository $id",
+        isPrivate = false,
+        description = "Github Repository $id description section",
+        stargazersCount = id * 1000,
+        languagesUrl = "https://api.github.com/repos/octocat/boysenberry-repo-1/languages",
+        owner = OwnerData(
+            id = (id * 3000).toLong(),
+            isPrivate = false,
+            name = "Author $id",
+            avatarUrl = "https://picsum.photos/${ratio()}/${ratio()}"
+        )
+    )
+
+    private fun ratio() : Int = (150 .. 300).random()
 }

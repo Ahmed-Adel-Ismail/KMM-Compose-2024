@@ -29,25 +29,25 @@ import login.core.ports.LoginStatePort
 
 @Composable
 fun LoginScreen(
-    loginStatePort: LoginStatePort,
+    loginState: LoginStatePort,
     onSuccess: () -> Unit,
     modifier: Modifier = Modifier,
     dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) {
     val scope = rememberCoroutineScope()
-    val username by loginStatePort.userName
-    val password by loginStatePort.password
-    val progress by loginStatePort.progress
-    val result by loginStatePort.result
+    val username by loginState.userName
+    val password by loginState.password
+    val progress by loginState.progress
+    val result by loginState.result
 
     LoginScreenContent(
         userName = username,
         password = password,
         progress = progress,
         result = result,
-        onUsernameChanged = { loginStatePort.userName.value = it },
-        onPasswordChanged = { loginStatePort.password.value = it },
-        onLoginClicked = { scope.launch(dispatcher) { loginStatePort.performLogin() } },
+        onUsernameChanged = { loginState.userName.value = it },
+        onPasswordChanged = { loginState.password.value = it },
+        onLoginClicked = { scope.launch(dispatcher) { loginState.performLogin() } },
         onSuccess = onSuccess,
         modifier = modifier
     )

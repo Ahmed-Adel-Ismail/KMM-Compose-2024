@@ -1,7 +1,7 @@
 package data.mocks
 
 val GithubRepositoriesMockResponse = """
-{data = [
+{"data" : [
       {
         "id": 132935648,
         "private": false,

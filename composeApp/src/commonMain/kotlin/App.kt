@@ -8,18 +8,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import home.HomeScreen
+import home.adapters.HomeState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.launch
 import login.LoginScreen
 import login.adapters.LoginState
-import login.core.ports.LoginStatePort
 import navigation.adapters.NavigationState
 import navigation.core.Screens.Home
 import navigation.core.Screens.Login
 import navigation.core.Screens.Splash
 import navigation.core.initialize
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import shared.adapters.StateHolder
 import splash.SplashScreen
 
 @Composable
@@ -39,7 +40,7 @@ fun App() {
 
 @Composable
 fun Screen(
-    navigationState: NavigationState
+    navigationState: NavigationState,
 ) {
     val screen by navigationState.screen
     var state by navigationState.state
@@ -52,19 +53,23 @@ fun Screen(
         }
 
         Login -> {
-            val newState: LoginStatePort =
-                if (state is LoginStatePort) state as LoginStatePort
-                else LoginState().also { state = it }
-
+            val holder = StateHolder("LoginState", LoginState())
+            state = holder
             LoginScreen(
-                loginStatePort = newState,
-                onSuccess = { navigationState.screen.value = Home },
+                loginState = holder.state(),
+                onSuccess = {
+                    holder.clear()
+                    navigationState.screen.value = Home
+                },
             )
         }
 
         Home -> {
-            state = null
-            HomeScreen()
+            val holder = StateHolder("HomeState", HomeState())
+            state = holder
+            HomeScreen(
+                homeState = holder.state()
+            )
         }
     }
 }
