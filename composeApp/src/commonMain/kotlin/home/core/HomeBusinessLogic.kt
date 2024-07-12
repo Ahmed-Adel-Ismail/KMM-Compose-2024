@@ -21,12 +21,10 @@ suspend fun HomeStatePort.fetch() {
 
 @Composable
 fun HomeStatePort.initialize() {
-    val allRepositories = repositories
-    val allFavorites = favorites
     selectableRepositories.clear()
-    selectableRepositories.addAll(allRepositories.map {
+    selectableRepositories.addAll(repositories.map {
         SelectableGithubRepository(
-            isFavorite = allFavorites.any { favorite -> favorite.id == it.id },
+            isFavorite = favorites.any { favorite -> favorite.id == it.id },
             repository = it,
             error = null,
         )
