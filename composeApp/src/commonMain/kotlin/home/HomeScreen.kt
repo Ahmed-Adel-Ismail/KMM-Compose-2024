@@ -87,7 +87,8 @@ fun RowScope.GithubRepositoryFetchedImage(painter: Painter) {
         contentDescription = null,
         contentScale = ContentScale.Crop,
         modifier = Modifier.Companion
-            .weight(3f)
+            .size(80.dp)
+            .padding(4.dp)
             .clip(CircleShape)
     )
 }
@@ -96,12 +97,12 @@ fun RowScope.GithubRepositoryFetchedImage(painter: Painter) {
 fun RowScope.GithubRepositoryErrorImage() {
     Icon(
         Icons.Sharp.Warning,
+        tint = MaterialTheme.colors.error,
         contentDescription = null,
         modifier = Modifier.Companion
-            .weight(3f)
+            .size(80.dp)
             .padding(24.dp)
             .clip(CircleShape)
-
     )
 }
 
@@ -109,7 +110,7 @@ fun RowScope.GithubRepositoryErrorImage() {
 fun RowScope.GithubRepositoryLoadingImage() {
     CircularProgressIndicator(
         modifier = Modifier.Companion
-            .weight(3f)
+            .size(80.dp)
             .padding(24.dp)
             .clip(CircleShape)
     )
@@ -150,7 +151,7 @@ fun RowScope.GithubRepositoryItemStarsSection(modifier: Modifier, item: GithubRe
 @Composable
 fun RowScope.GithubRepositoryItemMiddleSection(item: GithubRepository) {
     Column(
-        modifier = Modifier.fillMaxHeight().weight(10f).padding(4.dp),
+        modifier = Modifier.fillMaxHeight().weight(10f).padding(8.dp),
         horizontalAlignment = Alignment.Start,
         verticalArrangement = Arrangement.Top
     ) {
