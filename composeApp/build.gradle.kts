@@ -36,6 +36,7 @@ kotlin {
 
         androidMain.dependencies {
             implementation(compose.preview)
+            implementation(libs.ktor.client.okhttp)
             implementation(
                 libs.androidx.activity.compose.get()
                     .let { "${it.module}:${it.versionConstraint.requiredVersion}" }) {
@@ -57,9 +58,13 @@ kotlin {
             implementation(libs.kotlin.test)
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.kamel.image)
+            implementation(libs.ktor.client.core)
         }
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)
+        }
+        iosMain.dependencies {
+            implementation(libs.ktor.client.darwin)
         }
     }
 }

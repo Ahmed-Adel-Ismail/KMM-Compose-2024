@@ -1,11 +1,11 @@
 package home
 
-import aismailproject.composeapp.generated.resources.Res
-import aismailproject.composeapp.generated.resources.compose_multiplatform
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -13,25 +13,65 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.sharp.Warning
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import home.core.GithubRepository
-import org.jetbrains.compose.resources.painterResource
+import io.kamel.core.Resource
+import io.kamel.image.asyncPainterResource
 
 @Composable
 fun HomeScreen() {
-    // TODO : working on home feature still
-    GithubRepositoriesList(items = (1..100).map { githubRepository(it) })
+    GithubRepositoriesList(
+        modifier = Modifier.background(MaterialTheme.colors.background),
+        items = (1..100).map { githubRepository(it) }) {
+        when (val resource = asyncPainterResource(it)) {
+            is Resource.Loading -> {
+                CircularProgressIndicator(
+                    modifier = Modifier
+                        .weight(3f)
+                        .padding(24.dp)
+                        .clip(CircleShape)
+                )
+            }
+
+            is Resource.Success -> {
+                val painter: Painter = resource.value
+                Image(
+                    painter = painter,
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .weight(3f)
+                        .clip(CircleShape)
+                )
+            }
+
+            is Resource.Failure -> {
+                Icon(
+                    Icons.Sharp.Warning,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .weight(3f)
+                        .padding(24.dp)
+                        .clip(CircleShape)
+
+                )
+            }
+        }
+    }
 }
 
 @Composable
@@ -40,28 +80,24 @@ private fun githubRepository(id: Int = 0) = GithubRepository(
     id = id.toLong(),
     name = "Github Repository $id",
     ownerName = "Github Owner $id",
-    avatarUrl = "https://www.google.com/url?sa=i&url=https%3A%2F%2Fstock.adobe.com%2Fsearch%3Fk%3Dexample&psig=AOvVaw0Tjjyz91203DRbc-wbJ6qy&ust=1720648790327000&source=images&cd=vfe&opi=89978449&ved=0CBEQjRxqFwoTCJCgvbL6mocDFQAAAAAdAAAAABAE",
+    avatarUrl = "https://picsum.photos/200/300",
     stargazersCount = id * 1000
 )
 
 
 @Composable
-fun GithubRepositoryItem(item: GithubRepository, modifier: Modifier = Modifier) {
+fun GithubRepositoryItem(
+    item: GithubRepository,
+    modifier: Modifier = Modifier,
+    imageContent: @Composable RowScope.(imageUrl: String) -> Unit
+) {
     Row(
         modifier = modifier
             .height(80.dp)
             .padding(4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Image(
-            painter = painterResource(Res.drawable.compose_multiplatform), // TODO: load with Kamel
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .weight(3f)
-                .clip(CircleShape)
-
-        )
+        imageContent(item.avatarUrl.orEmpty())
         Column(
             modifier = Modifier
                 .fillMaxHeight()
@@ -92,10 +128,14 @@ fun GithubRepositoryItem(item: GithubRepository, modifier: Modifier = Modifier) 
 }
 
 @Composable
-fun GithubRepositoriesList(items: List<GithubRepository>, modifier: Modifier = Modifier) {
+fun GithubRepositoriesList(
+    items: List<GithubRepository>,
+    modifier: Modifier = Modifier,
+    imageContent: @Composable RowScope.(imageUrl: String) -> Unit
+) {
     LazyColumn {
         items(items) { item ->
-            GithubRepositoryItem(item = item, modifier = modifier)
+            GithubRepositoryItem(item = item, modifier = modifier, imageContent)
             Divider()
         }
     }
