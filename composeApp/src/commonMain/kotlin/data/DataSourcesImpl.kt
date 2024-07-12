@@ -12,9 +12,11 @@ import kotlinx.coroutines.delay
  * as this is a sample project, all integration points are grouped in one file for now
  * for the sake of simplicity
  */
+// TODO: data to be fetched from actual datasource
 object DataSourcesImpl : DataSources {
 
-    private var token by cache<String>("dataSources.expected.token")
+    private var token by cache<String>("data.token")
+    private var favorites by cache<List<GithubRepositoryData>>("data.favorites")
 
     override suspend fun getUsernameValidation(): List<(String?) -> Boolean> {
         delay(1000) // simulate server delay
@@ -26,13 +28,11 @@ object DataSourcesImpl : DataSources {
 
     override suspend fun getPasswordValidations(): List<(String?) -> Boolean> {
         delay(1000) // simulate server delay
-        return listOf(
-            { it != null && it.length > 4 }
-        )
+        return listOf({ it != null && it.length > 4 })
     }
 
     override suspend fun postLogin(username: String?, password: String?): String {
-        delay(3000) //simulate server delay
+        delay(2000) //simulate server delay
         return "$username|$password"
     }
 
@@ -44,17 +44,28 @@ object DataSourcesImpl : DataSources {
      * in a real application we have to handle token refresh and expiration
      */
     override suspend fun isLoggedIn(): Boolean {
+        delay(1000) // simulate IO delay
         return token != null
     }
 
-    // TODO: to be fetched from actual datasource with ktor
     override suspend fun getAllGithubRepositories(): AllGithubRepositoriesData {
         // return Json.decodeFromString(GithubRepositoriesMockResponse)
         delay(3000) //simulate server delay
-        return AllGithubRepositoriesData(
-            data = (1..500).map { mockGithubRepository(it) }
-        )
+        return AllGithubRepositoriesData(data = (1..500).map { mockGithubRepository(it) })
+    }
 
+    override suspend fun addToFavorites(repository: GithubRepositoryData) {
+        delay(1000) // simulate IO delay
+        favorites = favorites.orEmpty() + repository
+    }
+
+    override suspend fun removeFromFavorites(repository: GithubRepositoryData) {
+        delay(1000) // simulate IO delay
+        favorites = favorites.orEmpty() - repository
+    }
+
+    override suspend fun getAllFavorites(): List<GithubRepositoryData> {
+        return favorites.orEmpty()
     }
 
     private fun mockGithubRepository(id: Int = 1) = GithubRepositoryData(

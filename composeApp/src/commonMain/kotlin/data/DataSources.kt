@@ -1,5 +1,6 @@
 package data
 
+import GithubRepositoryData
 import data.models.AllGithubRepositoriesData
 
 /**
@@ -16,5 +17,10 @@ interface DataSources {
 
     suspend fun saveToken(token: String): Unit = throw NotImplementedError()
     suspend fun getAllGithubRepositories(): AllGithubRepositoriesData = throw NotImplementedError()
+    suspend fun addToFavorites(repository: GithubRepositoryData): Unit = throw NotImplementedError()
+    suspend fun removeFromFavorites(repository: GithubRepositoryData): Unit =
+        throw NotImplementedError()
+
+    suspend fun getAllFavorites(): List<GithubRepositoryData> = throw NotImplementedError()
 }
 

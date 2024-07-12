@@ -2,6 +2,7 @@ package home
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,11 +20,13 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.sharp.Warning
@@ -38,34 +41,67 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import home.core.GithubRepository
+import home.core.SelectableGithubRepository
+import home.core.fetch
 import home.core.initialize
 import home.core.ports.HomeStatePort
 import io.kamel.core.Resource
 import io.kamel.image.asyncPainterResource
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+
+
+private val imageModifier = Modifier
+    .size(width = 70.dp, height = 76.dp)
+    .padding(4.dp)
+    .clip(CircleShape)
+
+private val imageProgressModifier = Modifier
+    .size(width = 70.dp, height = 76.dp)
+    .padding(20.dp)
+    .clip(CircleShape)
 
 @Composable
 fun HomeScreen(
     homeState: HomeStatePort,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    dispatcher: CoroutineDispatcher = Dispatchers.IO,
+    onFavoritesClicked: () -> Unit = {}
 ) {
     val scope = rememberCoroutineScope()
-    val items by homeState.repositories
+    val items = homeState.selectableRepositories
     val progress by homeState.progress
-    val error by homeState.error
+    val error by homeState.genericError
 
     LaunchedEffect(Unit) {
-        scope.launch(Dispatchers.IO) { homeState.initialize() }
+        withContext(dispatcher){
+            homeState.fetch()
+        }
     }
+
+    homeState.initialize()
     Column(modifier = modifier.fillMaxSize()) {
-        TopAppBar(title = { Text(text = "Home", modifier = Modifier.fillMaxWidth()) })
+        TopAppBar(
+            title = { Text(text = "Home", modifier = Modifier.fillMaxWidth()) },
+            actions = {
+                IconButton(onClick = {}) {
+                    Icon(
+                        Icons.Filled.Favorite,
+                        contentDescription = null,
+                        tint = MaterialTheme.colors.background
+                    )
+                }
+            }
+        )
         if (progress) LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
         GithubRepositoriesList(
             items = items,
             error = error,
-            modifier = Modifier.background(MaterialTheme.colors.background)
+            modifier = Modifier.background(MaterialTheme.colors.background),
+            onItemClicked = { scope.launch(dispatcher) {} }
         )
     }
 
@@ -74,7 +110,7 @@ fun HomeScreen(
 @Composable
 fun RowScope.GithubRepositoryItemImage(it: String) {
     when (val resource = asyncPainterResource(it)) {
-        is Resource.Loading -> GithubRepositoryLoadingImage()
+        is Resource.Loading -> CircularProgressIndicator(modifier = imageProgressModifier)
         is Resource.Success -> GithubRepositoryFetchedImage(resource.value)
         is Resource.Failure -> GithubRepositoryErrorImage()
     }
@@ -86,10 +122,7 @@ fun RowScope.GithubRepositoryFetchedImage(painter: Painter) {
         painter = painter,
         contentDescription = null,
         contentScale = ContentScale.Crop,
-        modifier = Modifier.Companion
-            .size(80.dp)
-            .padding(4.dp)
-            .clip(CircleShape)
+        modifier = imageModifier
     )
 }
 
@@ -99,43 +132,34 @@ fun RowScope.GithubRepositoryErrorImage() {
         Icons.Sharp.Warning,
         tint = MaterialTheme.colors.error,
         contentDescription = null,
-        modifier = Modifier.Companion
-            .size(80.dp)
-            .padding(24.dp)
-            .clip(CircleShape)
+        modifier = imageModifier
     )
 }
 
-@Composable
-fun RowScope.GithubRepositoryLoadingImage() {
-    CircularProgressIndicator(
-        modifier = Modifier.Companion
-            .size(80.dp)
-            .padding(24.dp)
-            .clip(CircleShape)
-    )
-}
 
 @Composable
 fun GithubRepositoryItem(
-    item: GithubRepository,
-    modifier: Modifier = Modifier
+    item: SelectableGithubRepository,
+    modifier: Modifier = Modifier,
+    onItemClicked: (GithubRepository) -> Unit
 ) {
     Row(
-        modifier = modifier.height(80.dp).padding(4.dp),
-        verticalAlignment = Alignment.CenterVertically
+        modifier = modifier.height(80.dp)
+            .padding(4.dp)
+            .clickable { onItemClicked(item.repository) },
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        GithubRepositoryItemImage(item.avatarUrl.orEmpty())
-        GithubRepositoryItemMiddleSection(item)
-        GithubRepositoryItemStarsSection(modifier, item)
+        GithubRepositoryItemImage(item.repository.avatarUrl.orEmpty())
+        GithubRepositoryItemMiddleSection(item.repository)
+        GithubRepositoryItemStarsSection(item.repository)
     }
 }
 
 @Composable
-fun RowScope.GithubRepositoryItemStarsSection(modifier: Modifier, item: GithubRepository) {
+fun RowScope.GithubRepositoryItemStarsSection(item: GithubRepository) {
     Column(
-        modifier = modifier.fillMaxHeight().weight(3f),
-        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.fillMaxHeight().weight(3f).padding(4.dp),
+        horizontalAlignment = Alignment.End,
         verticalArrangement = Arrangement.SpaceEvenly
     ) {
         Icon(
@@ -162,25 +186,27 @@ fun RowScope.GithubRepositoryItemMiddleSection(item: GithubRepository) {
 
 @Composable
 fun GithubRepositoriesList(
-    items: List<GithubRepository>?,
+    items: List<SelectableGithubRepository>?,
     error: Throwable?,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onItemClicked: (GithubRepository) -> Unit
 ) {
     when {
         error != null -> GithubRepositoriesErrorMessage(modifier, error)
         items.isNullOrEmpty() -> GithubRepositoriesEmptyMessage(modifier)
-        else -> GithubRepositoriesLoadedView(items, modifier)
+        else -> GithubRepositoriesLoadedView(items, modifier, onItemClicked)
     }
 }
 
 @Composable
 fun GithubRepositoriesLoadedView(
-    items: List<GithubRepository>,
-    modifier: Modifier
+    items: List<SelectableGithubRepository>,
+    modifier: Modifier,
+    onItemClicked: (GithubRepository) -> Unit
 ) {
     LazyColumn {
         items(items) { item ->
-            GithubRepositoryItem(item = item, modifier = modifier)
+            GithubRepositoryItem(item = item, modifier = modifier, onItemClicked)
             Divider()
         }
     }
