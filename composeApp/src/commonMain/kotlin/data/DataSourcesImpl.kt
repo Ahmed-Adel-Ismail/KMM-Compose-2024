@@ -4,7 +4,6 @@ import GithubRepositoryData
 import OwnerData
 import data.models.AllGithubRepositoriesData
 import kotlinx.coroutines.delay
-import kotlin.random.Random
 
 /**
  * add expect when integrating with real data sources, if we had to
@@ -51,6 +50,7 @@ object DataSourcesImpl : DataSources {
     // TODO: to be fetched from actual datasource with ktor
     override suspend fun getAllGithubRepositories(): AllGithubRepositoriesData {
         // return Json.decodeFromString(GithubRepositoriesMockResponse)
+        delay(3000) //simulate server delay
         return AllGithubRepositoriesData(
             data = (1..500).map { mockGithubRepository(it) }
         )
@@ -72,5 +72,5 @@ object DataSourcesImpl : DataSources {
         )
     )
 
-    private fun ratio() : Int = (150 .. 300).random()
+    private fun ratio(): Int = (150..300).random()
 }

@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -18,8 +19,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
+import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Warning
@@ -45,21 +48,27 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun HomeScreen(
-    homeState: HomeStatePort
+    homeState: HomeStatePort,
+    modifier: Modifier = Modifier
 ) {
     val scope = rememberCoroutineScope()
     val items by homeState.repositories
+    val progress by homeState.progress
     val error by homeState.error
 
     LaunchedEffect(Unit) {
         scope.launch(Dispatchers.IO) { homeState.initialize() }
     }
+    Column(modifier = modifier.fillMaxSize()) {
+        TopAppBar(title = { Text(text = "Home", modifier = Modifier.fillMaxWidth()) })
+        if (progress) LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+        GithubRepositoriesList(
+            items = items,
+            error = error,
+            modifier = Modifier.background(MaterialTheme.colors.background)
+        )
+    }
 
-    GithubRepositoriesList(
-        items = items,
-        error = error,
-        modifier = Modifier.background(MaterialTheme.colors.background)
-    )
 }
 
 @Composable
@@ -205,14 +214,3 @@ fun GithubRepositoriesErrorMessage(modifier: Modifier, error: Throwable) {
         )
     }
 }
-
-
-@Composable
-private fun mockGithubRepository(id: Int = 0) = GithubRepository(
-    metadata = id,
-    id = id.toLong(),
-    name = "Github Repository $id",
-    ownerName = "Github Owner $id",
-    avatarUrl = "https://picsum.photos/200/300",
-    stargazersCount = id * 1000
-)
