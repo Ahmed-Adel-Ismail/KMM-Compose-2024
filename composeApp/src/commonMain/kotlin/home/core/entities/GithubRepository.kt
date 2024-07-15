@@ -1,4 +1,4 @@
-package home.core
+package home.core.entities
 
 data class GithubRepository(
     /**
@@ -6,7 +6,7 @@ data class GithubRepository(
      * dealing with data sources layer in other operations
      */
     val metadata: Any,
-    val id: Long? = null,
+    val id: Long,
     val name: String? = null,
     val ownerName: String? = null,
     val avatarUrl: String? = null,

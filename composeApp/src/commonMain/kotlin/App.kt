@@ -7,8 +7,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import home.HomeScreen
 import home.adapters.HomeState
+import home.ui.HomeScreen
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.launch
@@ -68,7 +68,8 @@ fun Screen(
             val holder = StateHolder("HomeState", HomeState())
             state = holder
             HomeScreen(
-                homeState = holder.state()
+                state = holder.state(),
+                onFavoritesClicked = { /* TODO: navigate to favorites screen */ }
             )
         }
     }

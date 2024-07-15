@@ -65,6 +65,7 @@ object DataSourcesImpl : DataSources {
     }
 
     override suspend fun getAllFavorites(): List<GithubRepositoryData> {
+        delay(1000) // simulate IO delay
         return favorites.orEmpty()
     }
 
