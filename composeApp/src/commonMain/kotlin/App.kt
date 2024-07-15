@@ -6,15 +6,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import favorites.ui.FavoritesScreen
 import home.adapters.HomeState
 import home.ui.HomeScreen
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.launch
-import login.ui.LoginScreen
 import login.adapters.LoginState
+import login.ui.LoginScreen
 import navigation.adapters.NavigationState
+import navigation.core.Screens.Favorites
 import navigation.core.Screens.Home
 import navigation.core.Screens.Login
 import navigation.core.Screens.Splash
@@ -42,35 +43,36 @@ fun App() {
 fun Screen(
     navigationState: NavigationState,
 ) {
-    val screen by navigationState.screen
-    var state by navigationState.state
-
-    when (screen) {
+    when (navigationState.screen) {
 
         Splash -> {
-            state = null
+            navigationState.state = null
             SplashScreen()
         }
 
         Login -> {
             val holder = StateHolder("LoginState", LoginState())
-            state = holder
+            navigationState.state = holder
             LoginScreen(
                 loginState = holder.state(),
                 onSuccess = {
                     holder.clear()
-                    navigationState.screen.value = Home
+                    navigationState.screen = Home
                 },
             )
         }
 
         Home -> {
             val holder = StateHolder("HomeState", HomeState())
-            state = holder
+            navigationState.state = holder
             HomeScreen(
                 state = holder.state(),
-                onFavoritesClicked = { /* TODO: navigate to favorites screen */ }
+                onFavoritesClicked = { navigationState.screen = Favorites },
             )
+        }
+
+        Favorites -> {
+            FavoritesScreen()
         }
     }
 }
