@@ -1,9 +1,11 @@
-package login
+package login.ui
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.LinearProgressIndicator
@@ -12,20 +14,24 @@ import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.launch
-import login.core.InvalidPasswordException
-import login.core.InvalidUsernameException
-import login.core.performLogin
 import login.core.ports.LoginStatePort
+import login.core.scenarios.InvalidPasswordException
+import login.core.scenarios.InvalidUsernameException
+import login.core.scenarios.performLogin
 
 @Composable
 fun LoginScreen(
@@ -35,18 +41,14 @@ fun LoginScreen(
     dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) {
     val scope = rememberCoroutineScope()
-    val username by loginState.userName
-    val password by loginState.password
-    val progress by loginState.progress
-    val result by loginState.result
 
     LoginScreenContent(
-        userName = username,
-        password = password,
-        progress = progress,
-        result = result,
-        onUsernameChanged = { loginState.userName.value = it },
-        onPasswordChanged = { loginState.password.value = it },
+        userName = loginState.userName,
+        password = loginState.password,
+        progress = loginState.progress,
+        result = loginState.result,
+        onUsernameChanged = { loginState.userName = it },
+        onPasswordChanged = { loginState.password = it },
         onLoginClicked = { scope.launch(dispatcher) { loginState.performLogin() } },
         onSuccess = onSuccess,
         modifier = modifier
@@ -69,6 +71,9 @@ fun LoginScreenContent(
     if (result == LoginStatePort.Result.Success) {
         onSuccess()
     } else {
+        val usernameFocusRequester = remember { FocusRequester() }
+        val passwordFocusRequester = remember { FocusRequester() }
+
         Column(modifier = modifier.fillMaxSize()) {
             TopAppBar(title = { Text(text = "Login", modifier = Modifier.fillMaxWidth()) })
             if (progress) LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
@@ -76,57 +81,96 @@ fun LoginScreenContent(
                 modifier = Modifier.fillMaxSize().padding(16.dp),
                 verticalArrangement = androidx.compose.foundation.layout.Arrangement.Center,
             ) {
-                UsernameOutlinedTextField(userName, result, onUsernameChanged)
-                PasswordOutlinedTextField(password, result, onPasswordChanged)
+                UsernameOutlinedTextField(
+                    userName,
+                    result,
+                    usernameFocusRequester,
+                    passwordFocusRequester,
+                    onUsernameChanged
+                )
+                PasswordOutlinedTextField(
+                    password,
+                    result,
+                    passwordFocusRequester,
+                    onPasswordChanged,
+                    onLoginClicked
+                )
                 LoginButton(progress, onLoginClicked)
             }
+        }
+
+        LaunchedEffect(Unit) {
+            usernameFocusRequester.requestFocus()
         }
     }
 }
 
 @Composable
-fun UsernameOutlinedTextField(
+private fun UsernameOutlinedTextField(
     userName: String?,
     result: LoginStatePort.Result?,
+    usernameFocusRequester: FocusRequester,
+    passwordFocusRequester: FocusRequester,
     onUsernameChanged: (String?) -> Unit
 ) {
     OutlinedTextField(
         modifier = Modifier
+            .focusRequester(usernameFocusRequester)
             .fillMaxWidth()
+            .height(80.dp)
             .padding(bottom = 16.dp),
         value = userName.orEmpty(),
         singleLine = true,
         label = { Text(text = "Username") },
         isError = result is LoginStatePort.Result.Error && result.error is InvalidUsernameException,
-        onValueChange = onUsernameChanged
+        onValueChange = onUsernameChanged,
+        keyboardActions = KeyboardActions(onDone = { passwordFocusRequester.requestFocus() })
     )
 }
 
 @Composable
-fun PasswordOutlinedTextField(
+private fun PasswordOutlinedTextField(
     password: String?,
     result: LoginStatePort.Result?,
-    onPasswordChanged: (String?) -> Unit
+    focusRequester: FocusRequester,
+    onPasswordChanged: (String?) -> Unit,
+    onLoginClicked: () -> Unit
 ) {
+    val focusManager = LocalFocusManager.current
     OutlinedTextField(
         modifier = Modifier
+            .focusRequester(focusRequester)
             .fillMaxWidth()
+            .height(80.dp)
             .padding(bottom = 16.dp),
         value = password.orEmpty(),
         label = { Text(text = "Password") },
         singleLine = true,
         visualTransformation = PasswordVisualTransformation(),
         isError = result is LoginStatePort.Result.Error && result.error is InvalidPasswordException,
-        onValueChange = onPasswordChanged
+        onValueChange = onPasswordChanged,
+        keyboardActions = KeyboardActions(onDone = {
+            focusManager.clearFocus()
+            onLoginClicked()
+        })
     )
 }
 
 @Composable
-fun LoginButton(progress: Boolean, onLoginClicked: () -> Unit) {
+private fun LoginButton(progress: Boolean, onLoginClicked: () -> Unit) {
+    val focusManager = LocalFocusManager.current
     Button(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(80.dp)
+            .padding(bottom = 16.dp),
         colors = ButtonDefaults.buttonColors(backgroundColor = if (!progress) MaterialTheme.colors.primary else Color.Gray),
-        onClick = { if (!progress) onLoginClicked() }) {
+        onClick = {
+            if (!progress) {
+                onLoginClicked()
+                focusManager.clearFocus()
+            }
+        }) {
         Text(text = "Login")
     }
 }

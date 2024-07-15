@@ -12,7 +12,7 @@ import home.ui.HomeScreen
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.launch
-import login.LoginScreen
+import login.ui.LoginScreen
 import login.adapters.LoginState
 import navigation.adapters.NavigationState
 import navigation.core.Screens.Home

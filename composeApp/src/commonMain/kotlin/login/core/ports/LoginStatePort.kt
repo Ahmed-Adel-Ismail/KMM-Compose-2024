@@ -1,13 +1,11 @@
 package login.core.ports
 
-import androidx.compose.runtime.MutableState
-
 interface LoginStatePort {
     val dataSourcePort: LoginDataSourcePort
-    val progress: MutableState<Boolean>
-    val userName: MutableState<String?>
-    val password: MutableState<String?>
-    val result: MutableState<Result?>
+    var progress: Boolean
+    var userName: String?
+    var password: String?
+    var result: Result?
 
     sealed interface Result {
         data object Success : Result
