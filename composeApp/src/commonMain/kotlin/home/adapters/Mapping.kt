@@ -3,7 +3,7 @@ package home.adapters
 import GithubRepositoryData
 import home.core.entities.GithubRepository
 
-internal fun createGithubRepository(data: GithubRepositoryData) = GithubRepository(
+fun createGithubRepository(data: GithubRepositoryData) = GithubRepository(
     metadata = data,
     id = data.id ?: throw IllegalArgumentException("Missing GithubRepositoryData id"),
     name = data.name,
@@ -11,3 +11,6 @@ internal fun createGithubRepository(data: GithubRepositoryData) = GithubReposito
     avatarUrl = data.owner?.avatarUrl,
     stargazersCount = data.stargazersCount,
 )
+
+val GithubRepository.githubRepositoryData: GithubRepositoryData
+    get() = metadata as GithubRepositoryData

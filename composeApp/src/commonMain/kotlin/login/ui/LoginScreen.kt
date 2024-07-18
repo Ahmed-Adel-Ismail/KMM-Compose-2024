@@ -35,7 +35,7 @@ import login.core.scenarios.performLogin
 
 @Composable
 fun LoginScreen(
-    loginState: LoginStatePort,
+    state: LoginStatePort,
     onSuccess: () -> Unit,
     modifier: Modifier = Modifier,
     dispatcher: CoroutineDispatcher = Dispatchers.IO
@@ -43,13 +43,13 @@ fun LoginScreen(
     val scope = rememberCoroutineScope()
 
     LoginScreenContent(
-        userName = loginState.userName,
-        password = loginState.password,
-        progress = loginState.progress,
-        result = loginState.result,
-        onUsernameChanged = { loginState.userName = it },
-        onPasswordChanged = { loginState.password = it },
-        onLoginClicked = { scope.launch(dispatcher) { loginState.performLogin() } },
+        userName = state.userName,
+        password = state.password,
+        progress = state.progress,
+        result = state.result,
+        onUsernameChanged = { state.userName = it },
+        onPasswordChanged = { state.password = it },
+        onLoginClicked = { scope.launch(dispatcher) { state.performLogin() } },
         onSuccess = onSuccess,
         modifier = modifier
     )

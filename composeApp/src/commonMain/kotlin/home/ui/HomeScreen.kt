@@ -65,12 +65,12 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 
-val imageModifier = Modifier
+private val imageModifier = Modifier
     .size(width = 70.dp, height = 76.dp)
     .padding(4.dp)
     .clip(CircleShape)
 
-val imageProgressModifier = Modifier
+private val imageProgressModifier = Modifier
     .size(width = 70.dp, height = 76.dp)
     .padding(20.dp)
     .clip(CircleShape)

@@ -2,6 +2,9 @@ package data
 
 import GithubRepositoryData
 import OwnerData
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import data.models.AllGithubRepositoriesData
 import kotlinx.coroutines.delay
 
@@ -16,7 +19,10 @@ import kotlinx.coroutines.delay
 object DataSourcesImpl : DataSources {
 
     private var token by cache<String>("data.token")
-    private var favorites by cache<List<GithubRepositoryData>>("data.favorites")
+    private var favorites by cache<List<GithubRepositoryData>>("data.favorites") {
+        favoritesSize.value = it?.size ?: 0
+    }
+    private val favoritesSize: MutableState<Int> = mutableStateOf(favorites?.size ?: 0)
 
     override suspend fun getUsernameValidation(): List<(String?) -> Boolean> {
         delay(1000) // simulate server delay
@@ -85,4 +91,8 @@ object DataSourcesImpl : DataSources {
     )
 
     private fun ratio(): Int = (150..300).random()
+
+    override fun observeOnFavoritesSize(): State<Int> {
+        return favoritesSize
+    }
 }
