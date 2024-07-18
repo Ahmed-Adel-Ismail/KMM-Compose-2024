@@ -23,7 +23,6 @@ interface DataSources {
         throw NotImplementedError()
 
     suspend fun getAllFavorites(): List<GithubRepositoryData> = throw NotImplementedError()
-
     fun observeOnFavoritesSize(): State<Int> = throw NotImplementedError()
 }
 
