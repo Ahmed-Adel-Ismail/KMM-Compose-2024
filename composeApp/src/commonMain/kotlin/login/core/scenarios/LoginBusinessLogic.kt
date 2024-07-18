@@ -8,7 +8,7 @@ suspend fun LoginStatePort.login() {
     progress = true
     validate(userName, password)
         .mapCatching { dataSourcePort.login(it.first, it.second) }
-        .mapCatching { dataSourcePort.saveToken(it) }
+        .mapCatching { dataSourcePort.saveUser(it) }
         .onSuccess { result = Success }
         .onFailure { result = Error(it) }
     progress = false

@@ -2,10 +2,8 @@ package data
 
 import GithubRepositoryData
 import OwnerData
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
 import data.models.AllGithubRepositoriesData
+import data.models.UserData
 import kotlinx.coroutines.delay
 
 /**
@@ -18,11 +16,8 @@ import kotlinx.coroutines.delay
 // TODO: data to be fetched from actual datasource
 object DataSourcesImpl : DataSources {
 
-    private var token by cache<String>("data.token")
-    private var favorites by cache<List<GithubRepositoryData>>("data.favorites") {
-        favoritesSize.value = it?.size ?: 0
-    }
-    private val favoritesSize: MutableState<Int> = mutableStateOf(favorites?.size ?: 0)
+    private var userData by cache<UserData>("data.userData")
+    private var favorites by cache<List<GithubRepositoryData>>("data.favorites")
 
     override suspend fun getUsernameValidation(): List<(String?) -> Boolean> {
         delay(1000) // simulate server delay
@@ -37,13 +32,13 @@ object DataSourcesImpl : DataSources {
         return listOf({ it != null && it.length > 4 })
     }
 
-    override suspend fun postLogin(username: String?, password: String?): String {
+    override suspend fun postLogin(username: String?, password: String?): UserData {
         delay(2000) //simulate server delay
-        return "$username|$password"
+        return UserData(id = 0, token = "$username|$password")
     }
 
-    override suspend fun saveToken(token: String) {
-        this.token = token
+    override suspend fun saveUser(userData: UserData) {
+        this.userData = userData
     }
 
     /**
@@ -51,7 +46,7 @@ object DataSourcesImpl : DataSources {
      */
     override suspend fun isLoggedIn(): Boolean {
         delay(1000) // simulate IO delay
-        return token != null
+        return userData != null
     }
 
     override suspend fun getAllGithubRepositories(): AllGithubRepositoriesData {
@@ -91,8 +86,4 @@ object DataSourcesImpl : DataSources {
     )
 
     private fun ratio(): Int = (150..300).random()
-
-    override fun observeOnFavoritesSize(): State<Int> {
-        return favoritesSize
-    }
 }
