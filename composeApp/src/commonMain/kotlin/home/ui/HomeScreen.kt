@@ -46,7 +46,6 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import home.adapters.GithubRepositoryState
-import home.core.entities.GithubRepository
 import home.core.ports.GithubRepositoryStatePort
 import home.core.ports.HomeStatePort
 import home.core.scenarios.addToFavorites
@@ -105,19 +104,15 @@ fun HomeScreen(
     }
 
     @Composable
-    fun ListItemsContent(
-        items: List<GithubRepositoryStatePort>?,
-        error: Throwable?,
-        onItemClicked: (GithubRepositoryStatePort) -> Unit
-    ) {
+    fun ListItemsContent() {
 
         @Composable
-        fun ErrorContent(error: Throwable) {
+        fun ErrorContent() {
 
             @Composable
-            fun ErrorText(error: Throwable) {
+            fun ErrorText() {
                 Text(
-                    text = "An error occurred: ${error.message}",
+                    text = "An error occurred: ${state.error?.message}",
                     style = MaterialTheme.typography.subtitle1
                 )
             }
@@ -138,7 +133,7 @@ fun HomeScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 ErrorIcon()
-                ErrorText(error)
+                ErrorText()
             }
         }
 
@@ -153,19 +148,13 @@ fun HomeScreen(
         }
 
         @Composable
-        fun LoadedContent(
-            listItems: List<GithubRepositoryStatePort>,
-            onItemClicked: (GithubRepositoryStatePort) -> Unit
-        ) {
+        fun LoadedContent() {
 
             @Composable
-            fun ItemContent(
-                item: GithubRepositoryStatePort,
-                onItemClicked: (GithubRepositoryStatePort) -> Unit
-            ) {
+            fun ItemContent(item: GithubRepositoryStatePort) {
 
                 @Composable
-                fun ItemImageSection(imageUrl: String) {
+                fun ItemImageSection() {
 
                     @Composable
                     fun FetchedImage(painter: Painter) {
@@ -187,7 +176,7 @@ fun HomeScreen(
                         )
                     }
 
-                    when (val resource = imageLoader(imageUrl)) {
+                    when (val resource = imageLoader(item.repository.avatarUrl.orEmpty())) {
                         is Resource.Loading -> CircularProgressIndicator(modifier = imageProgressModifier)
                         is Resource.Success -> FetchedImage(resource.value)
                         is Resource.Failure -> ErrorImage()
@@ -195,18 +184,18 @@ fun HomeScreen(
                 }
 
                 @Composable
-                fun RowScope.ItemMiddleSection(githubRepository: GithubRepository) {
+                fun RowScope.ItemMiddleSection() {
                     Column(
                         modifier = Modifier.fillMaxHeight().weight(10f).padding(8.dp),
                         horizontalAlignment = Alignment.Start,
                         verticalArrangement = Arrangement.Top
                     ) {
                         Text(
-                            text = githubRepository.name.orEmpty(),
+                            text = item.repository.name.orEmpty(),
                             style = MaterialTheme.typography.subtitle1
                         )
                         Text(
-                            text = githubRepository.ownerName.orEmpty(),
+                            text = item.repository.ownerName.orEmpty(),
                             style = MaterialTheme.typography.body2
                         )
                         if (item.isFavorite) Icon(
@@ -219,7 +208,7 @@ fun HomeScreen(
                 }
 
                 @Composable
-                fun RowScope.ItemStarsSection(githubRepository: GithubRepository) {
+                fun RowScope.ItemStarsSection() {
                     Column(
                         modifier = Modifier.fillMaxHeight().weight(3f).padding(4.dp),
                         horizontalAlignment = Alignment.End,
@@ -232,7 +221,7 @@ fun HomeScreen(
                             modifier = Modifier.size(24.dp)
                         )
                         Text(
-                            text = githubRepository.stargazersCount.toString(),
+                            text = item.repository.stargazersCount.toString(),
                             style = MaterialTheme.typography.subtitle1
                         )
                     }
@@ -241,27 +230,27 @@ fun HomeScreen(
                 Row(
                     modifier = modifier.height(80.dp)
                         .padding(4.dp)
-                        .clickable { onItemClicked(item) },
+                        .clickable { if (!item.progress) favoriteDialogItem = item },
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    ItemImageSection(item.repository.avatarUrl.orEmpty())
-                    ItemMiddleSection(item.repository)
-                    ItemStarsSection(item.repository)
+                    ItemImageSection()
+                    ItemMiddleSection()
+                    ItemStarsSection()
                 }
             }
 
             LazyColumn {
-                items(items = listItems, key = { it.repository.id }) { item ->
-                    ItemContent(item = item, onItemClicked)
+                items(items = state.repositories, key = { it.repository.id }) { item ->
+                    ItemContent(item = item)
                     Divider()
                 }
             }
         }
 
         when {
-            error != null -> ErrorContent(error)
-            items.isNullOrEmpty() -> EmptyContent()
-            else -> LoadedContent(items, onItemClicked)
+            state.error != null -> ErrorContent()
+            state.repositories.isEmpty() -> EmptyContent()
+            else -> LoadedContent()
         }
     }
 
@@ -315,11 +304,7 @@ fun HomeScreen(
         Column(modifier = modifier.fillMaxSize()) {
             TopAppBarContent()
             if (state.progress) LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-            ListItemsContent(
-                items = state.repositories,
-                error = state.error,
-                onItemClicked = { item -> if (!item.progress) favoriteDialogItem = item }
-            )
+            ListItemsContent()
         }
     }
 
