@@ -226,11 +226,11 @@ fun HomeScreen(
                     ) {
                         if (item.progress) CircularProgressIndicator(modifier = Modifier.size(24.dp))
                         else StarIcon()
+                        Text(
+                            text = item.repository.stargazersCount.toString(),
+                            style = MaterialTheme.typography.subtitle1
+                        )
                     }
-                    Text(
-                        text = item.repository.stargazersCount.toString(),
-                        style = MaterialTheme.typography.subtitle1
-                    )
                 }
 
                 Row(
