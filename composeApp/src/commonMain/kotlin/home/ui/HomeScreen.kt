@@ -28,7 +28,6 @@ import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.sharp.Warning
@@ -209,22 +208,29 @@ fun HomeScreen(
 
                 @Composable
                 fun RowScope.ItemStarsSection() {
+
+                    @Composable
+                    fun StarIcon() {
+                        Icon(
+                            Icons.Filled.Star,
+                            contentDescription = null,
+                            tint = MaterialTheme.colors.primary,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+
                     Column(
                         modifier = Modifier.fillMaxHeight().weight(3f).padding(4.dp),
                         horizontalAlignment = Alignment.End,
                         verticalArrangement = Arrangement.SpaceEvenly
                     ) {
-                        Icon(
-                            if (item.progress) Icons.Filled.Lock else Icons.Filled.Star,
-                            contentDescription = null,
-                            tint = MaterialTheme.colors.primary,
-                            modifier = Modifier.size(24.dp)
-                        )
-                        Text(
-                            text = item.repository.stargazersCount.toString(),
-                            style = MaterialTheme.typography.subtitle1
-                        )
+                        if (item.progress) CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                        else StarIcon()
                     }
+                    Text(
+                        text = item.repository.stargazersCount.toString(),
+                        style = MaterialTheme.typography.subtitle1
+                    )
                 }
 
                 Row(
@@ -237,12 +243,12 @@ fun HomeScreen(
                     ItemMiddleSection()
                     ItemStarsSection()
                 }
+                Divider()
             }
 
             LazyColumn {
-                items(items = state.repositories, key = { it.repository.id }) { item ->
-                    ItemContent(item = item)
-                    Divider()
+                items(items = state.repositories, key = { it.repository.id }) {
+                    ItemContent(item = it)
                 }
             }
         }
