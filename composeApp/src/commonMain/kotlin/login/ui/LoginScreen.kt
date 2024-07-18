@@ -31,7 +31,7 @@ import kotlinx.coroutines.launch
 import login.core.ports.LoginStatePort
 import login.core.scenarios.InvalidPasswordException
 import login.core.scenarios.InvalidUsernameException
-import login.core.scenarios.performLogin
+import login.core.scenarios.login
 
 @Composable
 fun LoginScreen(
@@ -49,7 +49,7 @@ fun LoginScreen(
         result = state.result,
         onUsernameChanged = { state.userName = it },
         onPasswordChanged = { state.password = it },
-        onLoginClicked = { scope.launch(dispatcher) { state.performLogin() } },
+        onLoginClicked = { scope.launch(dispatcher) { state.login() } },
         onSuccess = onSuccess,
         modifier = modifier
     )

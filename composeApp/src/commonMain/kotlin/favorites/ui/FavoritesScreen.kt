@@ -44,7 +44,7 @@ import favorites.adapters.FavoriteState
 import favorites.core.entities.FavoriteRepository
 import favorites.core.ports.AllFavoritesStatePort
 import favorites.core.ports.FavoriteStatePort
-import favorites.core.scenarios.initialize
+import favorites.core.scenarios.listAll
 import io.kamel.core.Resource
 import io.kamel.image.asyncPainterResource
 import kotlinx.coroutines.CoroutineDispatcher
@@ -244,7 +244,7 @@ fun FavoritesScreen(
 
         LaunchedEffect(Unit) {
             withContext(ioDispatcher) {
-                state.initialize { FavoriteState(it) }
+                state.listAll { FavoriteState(it) }
             }
         }
 

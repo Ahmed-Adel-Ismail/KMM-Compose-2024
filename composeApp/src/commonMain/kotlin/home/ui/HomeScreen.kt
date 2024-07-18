@@ -50,17 +50,13 @@ import home.core.entities.GithubRepository
 import home.core.ports.GithubRepositoryStatePort
 import home.core.ports.HomeStatePort
 import home.core.scenarios.addToFavorites
-import home.core.scenarios.fetchAllFavorites
-import home.core.scenarios.fetchAllRepositories
-import home.core.scenarios.initialize
-import home.core.scenarios.merge
+import home.core.scenarios.listAll
 import home.core.scenarios.removeFromFavorites
 import io.kamel.core.Resource
 import io.kamel.image.asyncPainterResource
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -310,10 +306,7 @@ fun HomeScreen(
 
         LaunchedEffect(Unit) {
             withContext(dispatcher) {
-                state.initialize()
-                val repositories = async(dispatcher) { state.fetchAllRepositories() }
-                val favorites = async(dispatcher) { state.fetchAllFavorites() }
-                state.merge(repositories.await(), favorites.await()) { GithubRepositoryState(it) }
+                state.listAll(dispatcher) { GithubRepositoryState(it) }
             }
         }
 

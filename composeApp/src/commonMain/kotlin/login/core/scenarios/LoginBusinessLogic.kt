@@ -4,7 +4,7 @@ import login.core.ports.LoginStatePort
 import login.core.ports.LoginStatePort.Result.Error
 import login.core.ports.LoginStatePort.Result.Success
 
-suspend fun LoginStatePort.performLogin() {
+suspend fun LoginStatePort.login() {
     progress = true
     validate(userName, password)
         .mapCatching { dataSourcePort.login(it.first, it.second) }

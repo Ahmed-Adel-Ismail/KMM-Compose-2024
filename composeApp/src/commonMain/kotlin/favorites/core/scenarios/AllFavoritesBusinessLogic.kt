@@ -5,7 +5,7 @@ import favorites.core.ports.AllFavoritesStatePort
 import favorites.core.ports.FavoriteStatePort
 
 
-suspend fun AllFavoritesStatePort.initialize(
+suspend fun AllFavoritesStatePort.listAll(
     favoritePortFactory: (FavoriteRepository) -> FavoriteStatePort
 ) {
     progress = true
