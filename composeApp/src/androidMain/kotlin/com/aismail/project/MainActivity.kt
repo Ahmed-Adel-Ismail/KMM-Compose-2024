@@ -7,8 +7,6 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.tooling.preview.Preview
 import navigation.OnBackPressedChannel
 
 class MainActivity : ComponentActivity() {
@@ -19,19 +17,11 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
 
-            App {
-                backPressedChannel = it.value
-            }
+            App { backPressedChannel = it.value }
 
             BackHandler(backPressedChannel.isBackPressActive) {
                 backPressedChannel.onBackPressed?.invoke()
             }
         }
     }
-}
-
-@Preview
-@Composable
-fun AppAndroidPreview() {
-
 }
