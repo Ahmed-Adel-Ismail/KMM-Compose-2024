@@ -41,16 +41,6 @@ fun App(onBackPressedProvider: @Composable (Provider<OnBackPressedChannel>) -> U
                 scope.launch(Dispatchers.IO) {
                     navigationState.initialize()
                 }
-
-//                // TODO: testing favorites feature
-//                navigationState.screen = Favorites
-//                scope.launch(Dispatchers.IO) {
-//                    DataSourcesImpl.getAllGithubRepositories().data.forEach {
-//                        println("AllFavoritesStatePort --> inserting: ${it.id}")
-//                        delay(2000)
-//                        DataSourcesImpl.addToFavorites(it)
-//                    }
-//                }
             }
             Screen(navigationState)
         }

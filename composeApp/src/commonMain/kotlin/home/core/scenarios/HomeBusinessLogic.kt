@@ -7,7 +7,6 @@ import home.core.ports.HomeStatePort
 suspend fun HomeStatePort.initialize() {
     error = null
     progress = true
-    repositories.clear()
 }
 
 suspend fun HomeStatePort.fetchAllRepositories() =

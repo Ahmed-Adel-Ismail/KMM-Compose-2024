@@ -124,7 +124,7 @@ fun FavoritesScreen(
                 modifier = Modifier.fillMaxSize().padding(16.dp),
                 contentAlignment = Alignment.Center
             ) {
-                Text(text = "No repositories", style = MaterialTheme.typography.h6)
+                Text(text = "No Favorites", style = MaterialTheme.typography.h6)
             }
         }
 
@@ -243,7 +243,6 @@ fun FavoritesScreen(
     fun FavoritesScreenContent() {
 
         LaunchedEffect(Unit) {
-            println("AllFavoritesStatePort | updated")
             withContext(ioDispatcher) {
                 state.initialize { FavoriteState(it) }
             }
