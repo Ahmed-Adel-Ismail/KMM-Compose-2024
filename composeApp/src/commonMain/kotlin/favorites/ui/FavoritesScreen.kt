@@ -62,7 +62,6 @@ private val imageProgressModifier =
 fun FavoritesScreen(
     state: AllFavoritesStatePort,
     modifier: Modifier = Modifier,
-    mainDispatcher: CoroutineDispatcher = Dispatchers.Main,
     ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
     imageLoader: @Composable (String) -> Resource<Painter> = { asyncPainterResource(it) },
     onBackPress: () -> Unit,
